@@ -7,27 +7,6 @@
     <meta name="description" content="Generate creative ideas for your projects with our AI-powered Idea Generator. Customizable categories and themes available.">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script>
-        function loadScript(src) {
-            return new Promise((resolve, reject) => {
-                let script = document.createElement('script');
-                script.src = src;
-                script.onload = () => resolve(script);
-                script.onerror = () => reject(new Error(`Script load error for ${src}`));
-                document.head.append(script);
-            });
-        }
-
-        loadScript('https://unpkg.com/vue@2.6.14/dist/vue.js')
-            .then(() => {
-                console.log('Vue loaded successfully');
-                initVueApp();
-            })
-            .catch(error => {
-                console.error('Failed to load Vue:', error);
-                document.body.innerHTML += '<p style="color: red;">Error: Failed to load Vue.js. Please check your internet connection and try again.</p>';
-            });
-    </script>
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -51,6 +30,7 @@
         <!-- The rest of the HTML remains the same -->
     </div>
 
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
     <script>
         function initVueApp() {
             new Vue({
@@ -64,10 +44,61 @@
                     loading: false
                 },
                 methods: {
-                    // The methods remain the same
+                    addPillar() {
+                        if (this.contentPillars.length < 5) {
+                            this.contentPillars.push('');
+                        }
+                    },
+                    removePillar(index) {
+                        this.contentPillars.splice(index, 1);
+                    },
+                    async generateIdeas() {
+                        if (!this.targetAudience || this.contentPillars.filter(p => p.trim()).length === 0 || !this.selectedCategory) {
+                            alert('Please fill in the target audience, select a category, and provide at least one content pillar.');
+                            return;
+                        }
+
+                        this.loading = true;
+                        this.results = [];
+
+                        const contentTypes = ['How-to', 'Listicle', 'Case Study', 'Interview', 'Review'];
+                        const validPillars = this.contentPillars.filter(pillar => pillar.trim() !== '');
+
+                        for (const pillar of validPillars) {
+                            const ideas = await Promise.all(contentTypes.map(async (type) => ({
+                                type,
+                                hook: await this.generateAIHook(this.targetAudience, pillar, type, this.selectedCategory)
+                            })));
+                            this.results.push({ pillar, ideas });
+                        }
+
+                        this.loading = false;
+                    },
+                    generateAIHook(targetAudience, contentPillar, contentType, category) {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                const hooks = {
+                                    'How-to': `Master ${contentPillar}: An essential ${category} guide for ${targetAudience}`,
+                                    'Listicle': `Top 7 ${contentPillar} techniques every ${targetAudience} should know for ${category}`,
+                                    'Case Study': `${targetAudience} success story: Revolutionizing ${category} with innovative ${contentPillar} strategies`,
+                                    'Interview': `Expert insights: A ${category} guru reveals ${contentPillar} secrets for ${targetAudience}`,
+                                    'Review': `The ultimate ${contentPillar} toolkit for ${targetAudience}: A comprehensive ${category} review`
+                                };
+                                resolve(hooks[contentType] || `Exploring ${contentPillar} in ${category}: Tailored insights for ${targetAudience}`);
+                            }, 500);
+                        });
+                    },
+                    rateIdea(resultIndex, ideaIndex, rating) {
+                        console.log(`Idea rated: ${rating} (Result: ${resultIndex}, Idea: ${ideaIndex})`);
+                    }
                 }
             });
         }
+
+        // Wait for the DOM to be fully loaded before initializing Vue
+        document.addEventListener('DOMContentLoaded', (event) => {
+            initVueApp();
+        });
     </script>
 </body>
 </html>
