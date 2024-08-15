@@ -20,7 +20,45 @@
     </div>
 
     <script>
-        // Your JavaScript will go here
+        // <script>
+const contentTypes = ['How-to', 'Listicle', 'Case Study', 'Interview', 'Review'];
+
+function generateAIHook(targetAudience, contentPillar, contentType) {
+    const hooks = {
+        'How-to': `Unlock the secrets of ${contentPillar}: A step-by-step guide for ${targetAudience} to master this essential skill`,
+        'Listicle': `Top 10 ${contentPillar} strategies that every ${targetAudience} needs to know`,
+        'Case Study': `How a leading ${targetAudience} revolutionized their approach to ${contentPillar}: A deep dive`,
+        'Interview': `Expert insights: An exclusive interview with a ${contentPillar} guru on what ${targetAudience} need to know`,
+        'Review': `The ultimate ${contentPillar} toolkit for ${targetAudience}: Our comprehensive review`
+    };
+    return hooks[contentType] || `Explore the world of ${contentPillar} with this tailored guide for ${targetAudience}`;
+}
+
+function generateIdeas() {
+    const targetAudience = document.getElementById('targetAudience').value;
+    const contentPillars = [
+        document.getElementById('contentPillar1').value,
+        document.getElementById('contentPillar2').value,
+        document.getElementById('contentPillar3').value
+    ].filter(pillar => pillar.trim() !== '');
+
+    if (!targetAudience || contentPillars.length === 0) {
+        alert('Please fill in the target audience and at least one content pillar.');
+        return;
+    }
+
+    let resultsHtml = '';
+    for (const pillar of contentPillars) {
+        resultsHtml += `<h2>${pillar}</h2>`;
+        for (const type of contentTypes) {
+            const hook = generateAIHook(targetAudience, pillar, type);
+            resultsHtml += `<p><strong>${type}:</strong> ${hook}</p>`;
+        }
+    }
+
+    document.getElementById('results').innerHTML = resultsHtml;
+}
+</script>
     </script>
 </body>
 </html>
